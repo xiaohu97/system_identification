@@ -3,7 +3,7 @@ import csv
 import sys
 from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
 from unitree_sdk2py.idl.unitree_hg.msg.dds_ import LowState_
-from unitree_go.msg.dds_ import SportModeState_
+from unitree_sdk2py.idl.unitree_go.msg.dds_ import SportModeState_
 
 class DataLogger:
     def __init__(self, odom_base_name, low_base_name, record_duration=20):
@@ -142,3 +142,5 @@ if __name__ == "__main__":
         sys.exit(1)
     logger = DataLogger(sys.argv[1], sys.argv[2])
     logger.run()
+    
+    
