@@ -32,10 +32,16 @@ git push origin main
 
 记录宇树G1数据 、 时间、位置、速度、加速度、力矩、触地状态 
 500hz 20000个数据  = 40 s
+1.使用ros2接口记录
 ```
 ros2 topic list
 ros2 bag record -a -o spot_data -d 40 
 ```
+2.使用dds接口记录
+```
+python read_g1_data_logger.py odom_data low_data
+```
+
 需要的数据
     # timestamp [s] and [10^{-9}s]
     # - seconds
