@@ -23,8 +23,48 @@ pip install urdf_parser_py
 pip install Mosek
 ```
 You also need to add a [license](https://www.mosek.com/products/academic-licenses/) for MOSEK in order to use the solver.  
-
+```
 git add .
 git commit -m ""
 git push origin main
+```
 
+
+记录宇树G1数据 、 时间、位置、速度、加速度、力矩、触地状态 
+# 500hz 20000个数据  = 40 s
+```
+ros2 topic list
+ros2 bag record -a -o spot_data -d 40 
+```
+需要的数据
+    # timestamp [s] and [10^{-9}s]
+    # - seconds
+    # - nanoseconds    
+
+    # position [m]
+    # - base:   body_lin_x	body_lin_y	body_lin_z	body_ang_x	body_ang_y	body_ang_z	body_ang_w
+    # - joints: fl.hx       fl.hy	    fl.kn   	fr.hx	    fr.hy	    fr.kn   	
+    #           hl.hx	    hl.hy	    hl.kn	    hr.hx	    hr.hy	    hr.kn
+
+    # velocity [m/s]
+    # - base:   body_lin_x	body_lin_y	body_lin_z	body_ang_x	body_ang_y	body_ang_z
+    # - joints: fl.hx       fl.hy	    fl.kn   	fr.hx	    fr.hy	    fr.kn   	
+    #           hl.hx	    hl.hy	    hl.kn	    hr.hx	    hr.hy	    hr.kn
+
+    # acceleration [m/s]
+    # - base:   body_lin_x	body_lin_y	body_lin_z	body_ang_x	body_ang_y	body_ang_z
+    # - joints: fl.hx       fl.hy	    fl.kn   	fr.hx	    fr.hy	    fr.kn   	
+    #           hl.hx	    hl.hy	    hl.kn	    hr.hx	    hr.hy	    hr.kn
+
+    # loads [Nm]
+    # - joints: fl.hx       fl.hy	    fl.kn   	fr.hx	    fr.hy	    fr.kn   	
+    #           hl.hx	    hl.hy	    hl.kn	    hr.hx	    hr.hy	    hr.kn
+
+    # foot_state []
+    # - foot in contact: CONTACT_UNKNOWN=0, CONTACT_MADE=1, CONTACT_LOST=2
+
+    # the base position and velocity can be measured in a odom or vison frame
+    # the base acceleration can not be measured yet because the RobotStateStreamingService, which is needed to read the IMU data, is still in beta.
+    # https://dev.bostondynamics.com/python/bosdyn-client/src/bosdyn/client/robot_state#bosdyn.client.robot_state.RobotStateStreamingClient.get_robot_state_stream
+    # https://dev.bostondynamics.com/protos/bosdyn/api/proto_reference#robotstatestreamingservice
+    
