@@ -31,7 +31,7 @@ git push origin main
 
 
 记录宇树G1数据 、 时间、位置、速度、加速度、力矩、触地状态 
-# 500hz 20000个数据  = 40 s
+500hz 20000个数据  = 40 s
 ```
 ros2 topic list
 ros2 bag record -a -o spot_data -d 40 
