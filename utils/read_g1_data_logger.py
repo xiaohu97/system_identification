@@ -7,88 +7,74 @@ from unitree_sdk2py.idl.default import unitree_go_msg_dds__SportModeState_
 from unitree_sdk2py.idl.unitree_go.msg.dds_ import SportModeState_
 
 class DataLogger:
-    def __init__(self, odom_base_name, low_base_name, record_duration=20):
-        self.odom_base_name = odom_base_name
-        self.low_base_name = low_base_name
+    def __init__(self, base_name, record_duration=20):
+        self.base_name = base_name
         self.record_duration = record_duration
-        self.odom_csv = None
-        self.low_csv = None
-        self.odom_writer = None
-        self.low_writer = None
-        self.odom_start_time = None
-        self.low_start_time = None
-        self.open_new_odom_file()
-        self.open_new_low_file()
+        self.csv_file = None
+        self.csv_writer = None
+        self.start_time = None
+        self.odom_data = None
+        self.low_data = None
+        self.open_new_csv_file()
 
-    def open_new_odom_file(self):
-        if self.odom_csv:
-            self.odom_csv.close()
+    def open_new_csv_file(self):
+        if self.csv_file:
+            self.csv_file.close()
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.odom_base_name}_{timestamp}.csv"
-        self.odom_csv = open(filename, 'w', newline='')
-        self.odom_writer = csv.writer(self.odom_csv)
-        self.odom_writer.writerow([
-            'timestamp_sec', 'timestamp_nanosec',
-            'mode',
-            'imu_quaternion_w', 'imu_quaternion_x', 'imu_quaternion_y', 'imu_quaternion_z',
-            'imu_angular_velocity_x', 'imu_angular_velocity_y', 'imu_angular_velocity_z',
-            'imu_linear_acceleration_x', 'imu_linear_acceleration_y', 'imu_linear_acceleration_z',
-            'imu_temperature',
-            'gait_type',
-            'position_mode',
-            'velocity_mode',
-            'yaw',
-            'position_x', 'position_y', 'position_z',
-            'yaw_speed',
-            'velocity_x', 'velocity_y', 'velocity_z',
-            'angular_speed',
-            'foot_position_1', 'foot_position_2', 'foot_position_3', 'foot_position_4',
-            'foot_contact_1', 'foot_contact_2', 'foot_contact_3', 'foot_contact_4',
-            'foot_force_1', 'foot_force_2', 'foot_force_3', 'foot_force_4', 'foot_force_5', 'foot_force_6',
-            'foot_force_7', 'foot_force_8', 'foot_force_9', 'foot_force_10', 'foot_force_11', 'foot_force_12',
-            'foot_position_x1', 'foot_position_y1', 'foot_position_z1',
-            'foot_position_x2', 'foot_position_y2', 'foot_position_z2',
-            'foot_position_x3', 'foot_position_y3', 'foot_position_z3',
-            'foot_position_x4', 'foot_position_y4', 'foot_position_z4',
-            *[f'path_point_{i+1}_{field}' for i in range(10) for field in [
-                'x', 'y', 'yaw', 'vx', 'vy', 'time'
-            ]]
-        ])
-        self.odom_start_time = time.time()
-
-    def open_new_low_file(self):
-        if self.low_csv:
-            self.low_csv.close()
-        timestamp = time.strftime("%Y%m%d_%H%M%S")
-        filename = f"{self.low_base_name}_{timestamp}.csv"
-        self.low_csv = open(filename, 'w', newline='')
-        self.low_writer = csv.writer(self.low_csv)
-        low_columns = [
-            'timestamp', 'tick', 'version_0', 'version_1',
-            'mode_pr', 'mode_machine',
-            'imu_quat_w', 'imu_quat_x', 'imu_quat_y', 'imu_quat_z',
-            'imu_gyro_x', 'imu_gyro_y', 'imu_gyro_z',
-            'imu_accel_x', 'imu_accel_y', 'imu_accel_z',
-            'imu_roll', 'imu_pitch', 'imu_yaw', 'imu_temperature'
+        filename = f"{self.base_name}_{timestamp}.csv"
+        self.csv_file = open(filename, 'w', newline='')
+        self.csv_writer = csv.writer(self.csv_file)
+        columns = [
+            'timestamp',
+            'odom_stamp_sec', 'odom_stamp_nanosec',
+            'odom_mode',
+            'odom_imu_quaternion_w', 'odom_imu_quaternion_x', 'odom_imu_quaternion_y', 'odom_imu_quaternion_z',
+            'odom_imu_angular_velocity_x', 'odom_imu_angular_velocity_y', 'odom_imu_angular_velocity_z',
+            'odom_imu_linear_acceleration_x', 'odom_imu_linear_acceleration_y', 'odom_imu_linear_acceleration_z',
+            'odom_imu_temperature',
+            'odom_gait_type',
+            'odom_position_mode',
+            'odom_velocity_mode',
+            'odom_yaw',
+            'odom_position_x', 'odom_position_y', 'odom_position_z',
+            'odom_yaw_speed',
+            'odom_velocity_x', 'odom_velocity_y', 'odom_velocity_z',
+            'odom_angular_speed',
+            'odom_foot_position_1', 'odom_foot_position_2', 'odom_foot_position_3', 'odom_foot_position_4',
+            'odom_foot_contact_1', 'odom_foot_contact_2', 'odom_foot_contact_3', 'odom_foot_contact_4',
+            'odom_foot_force_1', 'odom_foot_force_2', 'odom_foot_force_3', 'odom_foot_force_4',
+            'odom_foot_force_5', 'odom_foot_force_6', 'odom_foot_force_7', 'odom_foot_force_8',
+            'odom_foot_force_9', 'odom_foot_force_10', 'odom_foot_force_11', 'odom_foot_force_12',
+            'odom_foot_position_x1', 'odom_foot_position_y1', 'odom_foot_position_z1',
+            'odom_foot_position_x2', 'odom_foot_position_y2', 'odom_foot_position_z2',
+            'odom_foot_position_x3', 'odom_foot_position_y3', 'odom_foot_position_z3',
+            'odom_foot_position_x4', 'odom_foot_position_y4', 'odom_foot_position_z4',
+            *[f'odom_path_point_{i+1}_{field}' for i in range(10) for field in ['x', 'y', 'yaw', 'vx', 'vy', 'time']],
+            'low_tick', 'low_version_0', 'low_version_1',
+            'low_mode_pr', 'low_mode_machine',
+            'low_imu_quat_w', 'low_imu_quat_x', 'low_imu_quat_y', 'low_imu_quat_z',
+            'low_imu_gyro_x', 'low_imu_gyro_y', 'low_imu_gyro_z',
+            'low_imu_accel_x', 'low_imu_accel_y', 'low_imu_accel_z',
+            'low_imu_roll', 'low_imu_pitch', 'low_imu_yaw', 'low_imu_temperature'
         ]
         for i in range(35):
-            low_columns += [
-                f'motor_{i}_mode', f'motor_{i}_q', f'motor_{i}_dq',
-                f'motor_{i}_ddq', f'motor_{i}_tau_est',
-                f'motor_{i}_temp_0', f'motor_{i}_temp_1',
-                f'motor_{i}_sensor_0', f'motor_{i}_sensor_1',
-                f'motor_{i}_vol', f'motor_{i}_motorstate'
-            ] + [f'motor_{i}_reserve_{j}' for j in range(4)]
-        low_columns += [f'wireless_remote_{i}' for i in range(40)]
-        low_columns += [f'reserve_{i}' for i in range(4)]
-        low_columns += ['crc']
-        self.low_writer.writerow(low_columns)
-        self.low_start_time = time.time()
+            columns += [
+                f'low_motor_{i}_mode', f'low_motor_{i}_q', f'low_motor_{i}_dq',
+                f'low_motor_{i}_ddq', f'low_motor_{i}_tau_est',
+                f'low_motor_{i}_temp_0', f'low_motor_{i}_temp_1',
+                f'low_motor_{i}_sensor_0', f'low_motor_{i}_sensor_1',
+                f'low_motor_{i}_vol', f'low_motor_{i}_motorstate'
+            ] + [f'low_motor_{i}_reserve_{j}' for j in range(4)]
+        columns += [f'low_wireless_remote_{i}' for i in range(40)]
+        columns += [f'low_reserve_{i}' for i in range(4)]
+        columns += ['low_crc']
+        self.csv_writer.writerow(columns)
+        self.start_time = time.time()
 
     def odom_callback(self, msg):
         current_time = time.time()
-        if current_time - self.odom_start_time >= self.record_duration:
-            self.open_new_odom_file()
+        if current_time - self.start_time >= self.record_duration:
+            self.open_new_csv_file()
         try:
             stamp = getattr(msg, 'stamp', None)
             sec = stamp.sec if stamp else 0
@@ -100,7 +86,7 @@ class DataLogger:
             foot_force = msg.foot_force + [0] * (12 - len(msg.foot_force)) if len(msg.foot_force) < 12 else msg.foot_force[:12]
             foot_position_body = msg.foot_position_body + [0] * (12 - len(msg.foot_position_body)) if len(msg.foot_position_body) < 12 else msg.foot_position_body[:12]
 
-            row = [
+            odom_row = [
                 sec, nanosec,
                 msg.mode,
                 msg.imu_state.quaternion[0], msg.imu_state.quaternion[1], msg.imu_state.quaternion[2], msg.imu_state.quaternion[3],
@@ -128,9 +114,8 @@ class DataLogger:
                     msg.path_point[i].yaw, msg.path_point[i].vx, msg.path_point[i].vy, msg.path_point[i].t_from_start
                 ]]
             ]
-            self.odom_writer.writerow(row)
-            if int(current_time * 1000) % 100 == 0:
-                self.odom_csv.flush()
+            self.odom_data = odom_row
+            self.write_row(current_time)
         except AttributeError as e:
             print(f"Error processing odom message: {e}")
         except IndexError as e:
@@ -138,15 +123,15 @@ class DataLogger:
 
     def low_callback(self, msg):
         current_time = time.time()
-        if current_time - self.low_start_time >= self.record_duration:
-            self.open_new_low_file()
+        if current_time - self.start_time >= self.record_duration:
+            self.open_new_csv_file()
         try:
-            row = [
-                current_time, msg.tick, msg.version[0], msg.version[1],
+            low_row = [
+                msg.tick, msg.version[0], msg.version[1],
                 msg.mode_pr, msg.mode_machine
             ]
             imu = msg.imu_state
-            row += [
+            low_row += [
                 imu.quaternion[0], imu.quaternion[1], imu.quaternion[2], imu.quaternion[3],
                 imu.gyroscope[0], imu.gyroscope[1], imu.gyroscope[2],
                 imu.accelerometer[0], imu.accelerometer[1], imu.accelerometer[2],
@@ -154,32 +139,40 @@ class DataLogger:
                 imu.temperature
             ]
             for motor in msg.motor_state[:35]:
-                row += [
+                low_row += [
                     motor.mode, motor.q, motor.dq, motor.ddq, motor.tau_est,
                     motor.temperature[0], motor.temperature[1],
                     motor.sensor[0], motor.sensor[1],
                     motor.vol, motor.motorstate
                 ] + list(motor.reserve)
             for _ in range(35 - len(msg.motor_state)):
-                row += [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] + [0, 0, 0, 0]
-            row += list(msg.wireless_remote)
-            row += list(msg.reserve)
-            row += [msg.crc]
-            self.low_writer.writerow(row)
-            if int(current_time * 1000) % 100 == 0:
-                self.low_csv.flush()
+                low_row += [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] + [0, 0, 0, 0]
+            low_row += list(msg.wireless_remote)
+            low_row += list(msg.reserve)
+            low_row += [msg.crc]
+            self.low_data = low_row
+            self.write_row(current_time)
         except AttributeError as e:
             print(f"Error processing low message: {e}")
         except IndexError as e:
             print(f"Index error in low message: {e}")
 
+    def write_row(self, current_time):
+        odom_row = self.odom_data if self.odom_data else [0] * (2 + 1 + 4 + 3 + 3 + 1 + 1 + 1 + 1 + 1 + 3 + 1 + 3 + 1 + 4 + 4 + 12 + 12 + 10 * 6)
+        low_row = self.low_data if self.low_data else [0] * (1 + 2 + 2 + 4 + 3 + 3 + 1 + 35 * (11 + 4) + 40 + 4 + 1)
+        row = [current_time] + odom_row + low_row
+        self.csv_writer.writerow(row)
+        if int(current_time * 1000) % 100 == 0:
+            self.csv_file.flush()
+
     def run(self):
         ChannelFactoryInitialize(0)
-        odom_sub = ChannelSubscriber("rt/odommodestate", SportModeState_, qos_depth=50)
-        low_sub = ChannelSubscriber("rt/lowstate", LowState_, qos_depth=50)
+        # 移除 qos_depth，假设不支持此参数
+        odom_sub = ChannelSubscriber("rt/odommodestate", SportModeState_)
+        low_sub = ChannelSubscriber("rt/lowstate", LowState_)
         try:
-            odom_sub.Init(self.odom_callback, 50)
-            low_sub.Init(self.low_callback, 50)
+            odom_sub.Init(self.odom_callback, 10)  # 使用默认队列深度
+            low_sub.Init(self.low_callback, 10)
             while True:
                 time.sleep(1)
         except Exception as e:
@@ -188,14 +181,12 @@ class DataLogger:
             self.__del__()
 
     def __del__(self):
-        if self.odom_csv:
-            self.odom_csv.close()
-        if self.low_csv:
-            self.low_csv.close()
+        if self.csv_file:
+            self.csv_file.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("用法: python data_logger.py <odom_base_name> <low_base_name>")
+    if len(sys.argv) != 2:
+        print("用法: python data_logger.py <base_name>")
         sys.exit(1)
-    logger = DataLogger(sys.argv[1], sys.argv[2])
+    logger = DataLogger(sys.argv[1])
     logger.run()
