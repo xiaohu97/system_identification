@@ -39,7 +39,11 @@ ros2 bag record -a -o spot_data -d 40
 ```
 2.使用dds接口记录
 ```
-python read_g1_data_logger.py odom_data low_data
+python deploy_real.py enp4s0 g1.yaml
+
+python3 subscriber.py
+
+python3 read_g1_data_logger.py odom_data low_data
 ```
 
 需要的数据
