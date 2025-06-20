@@ -43,7 +43,8 @@ python deploy_real.py enp4s0 g1.yaml
 
 python3 subscriber.py
 
-python3 read_g1_data_logger.py odom_data low_data
+python3 read_g1_data_logger.py output_g1
+# python3 read_g1_data_logger.py odom_data low_data
 ```
 
 需要的数据
