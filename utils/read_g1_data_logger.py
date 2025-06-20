@@ -3,6 +3,7 @@ import csv
 import sys
 from unitree_sdk2py.core.channel import ChannelSubscriber, ChannelFactoryInitialize
 from unitree_sdk2py.idl.unitree_hg.msg.dds_ import LowState_
+from unitree_sdk2py.idl.default import unitree_go_msg_dds__SportModeState_
 from unitree_sdk2py.idl.unitree_go.msg.dds_ import SportModeState_
 
 # timestamp [s] and [10^{-9}s]
@@ -141,39 +142,43 @@ class DataLogger:
         # 检查是否需要创建新文件
         if current_time - self.odom_start_time >= self.record_duration:
             self.open_new_odom_file()
-
-        row = [
-            msg.timespec.sec, msg.timespec.nanosec,  # TimeSpec_
-            msg.mode,                                # mode
-            msg.imu_state.quaternion[0], msg.imu_state.quaternion[1], msg.imu_state.quaternion[2], msg.imu_state.quaternion[3],  # IMU quaternion
-            msg.imu_state.angular_velocity[0], msg.imu_state.angular_velocity[1], msg.imu_state.angular_velocity[2],  # IMU angular velocity
-            msg.imu_state.linear_acceleration[0], msg.imu_state.linear_acceleration[1], msg.imu_state.linear_acceleration[2],  # IMU linear acceleration
-            msg.imu_state.temperature,               # IMU temperature
-            msg.gait_type,                           # gait type
-            msg.position_mode,                       # position mode
-            msg.velocity_mode,                       # velocity mode
-            msg.yaw,                                 # yaw
-            msg.position[0], msg.position[1], msg.position[2],  # position
-            msg.yaw_speed,                           # yaw speed
-            msg.velocity[0], msg.velocity[1], msg.velocity[2],  # velocity
-            msg.angular_speed,                       # angular speed
-            msg.foot_position[0], msg.foot_position[1], msg.foot_position[2], msg.foot_position[3],  # foot positions
-            msg.foot_contact[0], msg.foot_contact[1], msg.foot_contact[2], msg.foot_contact[3],  # foot contact states
-            msg.foot_force[0], msg.foot_force[1], msg.foot_force[2], msg.foot_force[3], msg.foot_force[4], msg.foot_force[5],
-            msg.foot_force[6], msg.foot_force[7], msg.foot_force[8], msg.foot_force[9], msg.foot_force[10], msg.foot_force[11],  # foot forces
-            msg.foot_position_global[0], msg.foot_position_global[1], msg.foot_position_global[2],  # foot position 1
-            msg.foot_position_global[3], msg.foot_position_global[4], msg.foot_position_global[5],  # foot position 2
-            msg.foot_position_global[6], msg.foot_position_global[7], msg.foot_position_global[8],  # foot position 3
-            msg.foot_position_global[9], msg.foot_position_global[10], msg.foot_position_global[11],  # foot position 4
-            # Path points (10 points, each with 7 fields: x, y, z, yaw, vx, vy, time)
-            *[field for i in range(10) for field in [
-                msg.path_point[i].x, msg.path_point[i].y, msg.path_point[i].z,
-                msg.path_point[i].yaw, msg.path_point[i].vx, msg.path_point[i].vy, msg.path_point[i].time
-            ]]
-        ]
-        self.odom_writer.writerow(row)
-        self.odom_csv.flush()
-
+        try:
+            row = [
+                msg.timespec.sec, msg.timespec.nanosec,  # TimeSpec_
+                msg.mode,                                # mode
+                msg.imu_state.quaternion[0], msg.imu_state.quaternion[1], msg.imu_state.quaternion[2], msg.imu_state.quaternion[3],  # IMU quaternion
+                msg.imu_state.angular_velocity[0], msg.imu_state.angular_velocity[1], msg.imu_state.angular_velocity[2],  # IMU angular velocity
+                msg.imu_state.linear_acceleration[0], msg.imu_state.linear_acceleration[1], msg.imu_state.linear_acceleration[2],  # IMU linear acceleration
+                msg.imu_state.temperature,               # IMU temperature
+                msg.gait_type,                           # gait type
+                msg.position_mode,                       # position mode
+                msg.velocity_mode,                       # velocity mode
+                msg.yaw,                                 # yaw
+                msg.position[0], msg.position[1], msg.position[2],  # position
+                msg.yaw_speed,                           # yaw speed
+                msg.velocity[0], msg.velocity[1], msg.velocity[2],  # velocity
+                msg.angular_speed,                       # angular speed
+                msg.foot_position[0], msg.foot_position[1], msg.foot_position[2], msg.foot_position[3],  # foot positions
+                msg.foot_contact[0], msg.foot_contact[1], msg.foot_contact[2], msg.foot_contact[3],  # foot contact states
+                msg.foot_force[0], msg.foot_force[1], msg.foot_force[2], msg.foot_force[3], msg.foot_force[4], msg.foot_force[5],
+                msg.foot_force[6], msg.foot_force[7], msg.foot_force[8], msg.foot_force[9], msg.foot_force[10], msg.foot_force[11],  # foot forces
+                msg.foot_position_global[0], msg.foot_position_global[1], msg.foot_position_global[2],  # foot position 1
+                msg.foot_position_global[3], msg.foot_position_global[4], msg.foot_position_global[5],  # foot position 2
+                msg.foot_position_global[6], msg.foot_position_global[7], msg.foot_position_global[8],  # foot position 3
+                msg.foot_position_global[9], msg.foot_position_global[10], msg.foot_position_global[11],  # foot position 4
+                # Path points (10 points, each with 7 fields: x, y, z, yaw, vx, vy, time)
+                *[field for i in range(10) for field in [
+                    msg.path_point[i].x, msg.path_point[i].y, msg.path_point[i].z,
+                    msg.path_point[i].yaw, msg.path_point[i].vx, msg.path_point[i].vy, msg.path_point[i].time
+                ]]
+            ]
+            self.odom_writer.writerow(row)
+            if int(current_time * 1000) % 100 == 0:  # 每 100ms flush 一次
+                self.odom_csv.flush()
+        except AttributeError as e:
+            print(f"Error processing odom message: {e}")
+        except IndexError as e:
+            print(f"Index error in odom message: {e}")
     def low_callback(self, msg):
         current_time = time.time()
         # 检查是否需要创建新文件
@@ -204,7 +209,8 @@ class DataLogger:
         row += list(msg.reserve)
         row += [msg.crc]
         self.low_writer.writerow(row)
-        self.low_csv.flush()
+        if int(current_time * 1000) % 100 == 0:  # 每 100ms flush 一次
+           self.low_csv.flush()
 
     def run(self):
         ChannelFactoryInitialize(0)
