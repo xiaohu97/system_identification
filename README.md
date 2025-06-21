@@ -12,6 +12,7 @@ pip install urdf_parser_py
 pip install Mosek  # 仅在拥有 MOSEK 许可证时
 
 ### git 
+
 ```
 git add .
 git commit -m ""
@@ -21,13 +22,15 @@ git push origin main
 ### 收集数据
 记录宇树G1数据 、 时间、位置、速度、加速度、力矩、触地状态 
 500hz 20000个数据  = 40 s
-#  1.使用ros2接口记录
+
+1.使用ros2接口记录
+
 ```
 ros2 topic list
 ros2 bag record -a -o spot_data -d 40 
 ```
 
-#  2.使用dds接口记录
+2.使用dds接口记录
 ```
 python deploy_real.py enp4s0 g1.yaml
 
