@@ -11,8 +11,9 @@ conda install numpy pyyaml trimesh pinocchio cvxpy
 pip install urdf_parser_py
 pip install Mosek  # 仅在拥有 MOSEK 许可证时
 
-### git 
+```
 
+### git 
 ```
 git add .
 git commit -m ""
