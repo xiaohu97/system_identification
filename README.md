@@ -11,33 +11,23 @@ conda install numpy pyyaml trimesh pinocchio cvxpy
 pip install urdf_parser_py
 pip install Mosek  # 仅在拥有 MOSEK 许可证时
 
-
-
-
-pip install numpy
-pip install cvxpy
-pip install pyyaml
-pip install trimesh
-pip install pin
-pip install urdf_parser_py
-pip install Mosek
-```
-You also need to add a [license](https://www.mosek.com/products/academic-licenses/) for MOSEK in order to use the solver.  
+### git 
 ```
 git add .
 git commit -m ""
 git push origin main
 ```
 
-
+### 收集数据
 记录宇树G1数据 、 时间、位置、速度、加速度、力矩、触地状态 
 500hz 20000个数据  = 40 s
-1.使用ros2接口记录
+#  1.使用ros2接口记录
 ```
 ros2 topic list
 ros2 bag record -a -o spot_data -d 40 
 ```
-2.使用dds接口记录
+
+#  2.使用dds接口记录
 ```
 python deploy_real.py enp4s0 g1.yaml
 
@@ -47,7 +37,7 @@ python3 read_g1_data_logger.py output_g1
 # python3 read_g1_data_logger.py odom_data low_data
 ```
 
-需要的数据
+#  需要的数据
     # timestamp [s] and [10^{-9}s]
     # - seconds
     # - nanoseconds    
