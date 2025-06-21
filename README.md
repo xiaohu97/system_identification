@@ -41,7 +41,7 @@ python3 read_g1_data_logger.py output_g1
 # python3 read_g1_data_logger.py odom_data low_data
 ```
 
-#  需要的数据
+##  需要的数据
     # timestamp [s] and [10^{-9}s]
     # - seconds
     # - nanoseconds    
