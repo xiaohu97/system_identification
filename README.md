@@ -39,12 +39,17 @@ python3 subscriber.py
 
 python3 read_g1_data_logger.py output_g1
 # python3 read_g1_data_logger.py odom_data low_data
+
+# 处理收集的数据
+# python low_ddq.py 
+python low_ddq_contact_tick.py /path/to/your/csv/file.csv
+# 提取dat文件
+python csv2dat.py /path/to/your/csv/file.csv
 ```
 
-##  需要的数据
-    # timestamp [s] and [10^{-9}s]
+###  需要的数据
+    # timestamp [s]
     # - seconds
-    # - nanoseconds    
 
     # position [m]
     # - base:   body_lin_x	body_lin_y	body_lin_z	body_ang_x	body_ang_y	body_ang_z	body_ang_w
