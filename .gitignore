@@ -9,6 +9,8 @@ __pycache__/
 data
 *.dat
 *.csv
+g1-data/*.csv
+g1-data/stepping/*.csv
 
 # Other files #
 ##################
